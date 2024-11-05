@@ -1,10 +1,11 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { IsGuestGuard } from 'src/guards/isGuest.guard';
 import { IsUserGuard } from 'src/guards/isUser.guard';
 import { AuthUserService } from './services/auth.service';
-import { IUserCreateDto } from 'src/shared/interfaces/user.';
+import { IUserCreateDto, IUserSignInDto } from 'src/shared/interfaces/user.';
 import { JwtSvc } from 'src/shared/services/jwt.service';
+import { ICustomHeaders } from 'src/shared/interfaces/custom-header';
 
 @Controller('user/auth')
 export class AuthController {
@@ -17,8 +18,23 @@ export class AuthController {
 
   @Post('/signin')
   @UseGuards(IsGuestGuard)
-  loginUser(@Req() request: Request, @Res() response: Response): void {
-    response.send();
+  async loginUser(@Req() request: Request, @Res() response: Response, @Body() body: IUserSignInDto): Promise<void> {
+    try {
+      const existingUser = await this._authUserService.signIn(body);
+      if (existingUser) {
+        const token = await this._jwtService.createUserToken({
+          email: existingUser.email,
+          username: existingUser.username,
+        });
+        response.send({
+          data: {
+            token: token,
+          },
+        });
+      }
+    } catch (error) {
+      response.send(error);
+    }
   }
 
   @Post('/signup')
@@ -43,9 +59,16 @@ export class AuthController {
 
     response.send();
   }
-  @Post('/profile/delete')
+  @Delete('/profile/delete')
   @UseGuards(IsUserGuard)
-  deleteUserProfile(@Req() request: Request, @Res() response: Response): void {
-    response.send();
+  async deleteUserProfile(@Req() request: ICustomHeaders, @Res() response: Response): Promise<void> {
+    try {
+      const deletedUser = await this._authUserService.deleteUser(request.user.email);
+      if (deletedUser) {
+        response.send('User is deleted!');
+      }
+    } catch (error) {
+      response.send(error);
+    }
   }
 }

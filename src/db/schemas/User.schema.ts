@@ -22,7 +22,7 @@ export class User {
   lastName: string;
   @Prop({ default: '' })
   phone: string;
-  @Prop({ type: AddressSchema,  default: {} })
+  @Prop({ type: AddressSchema,  default: {city: '', street: '', postalCode: ''} })
   address;
 }
 

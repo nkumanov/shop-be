@@ -5,6 +5,11 @@ export interface IUserCreateDto {
   confirmPassword: string;
 }
 
+export interface IUserSignInDto {
+  email: string;
+  password: string;
+}
+
 export interface IUserInfoDto {
   fName: string;
   sName: string;
