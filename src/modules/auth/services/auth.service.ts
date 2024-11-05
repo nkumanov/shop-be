@@ -1,12 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from 'src/db/schemas/User.schema';
 import { IUserInfo } from '../dto/user';
 import * as bcrypt from 'bcrypt';
+import { JwtSvc } from '../../../shared/services/jwt.service';
+import { IUserCreateDto } from 'src/shared/interfaces/user.';
 @Injectable()
-export class UserService {
-  constructor(@InjectModel(User.name) private readonly _userModel: Model<User>) {}
+export class AuthUserService {
+  constructor(
+    @InjectModel(User.name) private readonly _userModel: Model<User>,
+    private readonly jwtService: JwtSvc,
+  ) {}
 
   async getUserById(userId: string): Promise<IUserInfo> {
     try {
@@ -26,7 +31,7 @@ export class UserService {
     }
   }
 
-  async createNewUser(userData: IUserInfo): Promise<IUserInfo> {
+  async createNewUser(userData: any): Promise<IUserInfo> {
     try {
       const newUser = new this._userModel(userData);
       return await newUser.save();
@@ -35,19 +40,31 @@ export class UserService {
     }
   }
 
-  async signUp(userData: IUserInfo): Promise<any> {
+  async signUp(userDataDto: IUserCreateDto): Promise<IUserInfo> {
     try {
-      const checkIfExisting = await this._userModel.findOne({ email: userData.email });
+      const checkIfExisting = await this._userModel.findOne({ email: userDataDto.email });
       if (checkIfExisting) {
-        throw new Error('user already exist');
+        throw new BadRequestException('This email already exists!');
       }
+      if (userDataDto.password !== userDataDto.confirmPassword) {
+        throw new BadRequestException('Passwords do not match!');
+      }
+      delete userDataDto.confirmPassword;
+      const newUserToCreate = {
+        ...userDataDto,
+      };
       const passwordSalts = 10;
-      const hashedPassword = await bcrypt.hash(userData.password, passwordSalts);
-      userData.password = hashedPassword;
-      const newRegisteredUser = await this.createNewUser(userData);
-      return newRegisteredUser;
+      const hashedPassword = await bcrypt.hash(userDataDto.password, passwordSalts);
+      newUserToCreate.password = hashedPassword;
+      return this.createNewUser(newUserToCreate);
     } catch (error) {
-      console.log(error);
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 

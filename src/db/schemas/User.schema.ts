@@ -16,13 +16,13 @@ export class User {
   username: string;
   @Prop({ required: true })
   password: string;
-  @Prop({ required: true })
+  @Prop({ default: '' })
   firstName: string;
-  @Prop({ required: true })
+  @Prop({ default: '' })
   lastName: string;
-  @Prop({ required: true })
+  @Prop({ default: '' })
   phone: string;
-  @Prop({ required: true, type: AddressSchema })
+  @Prop({ type: AddressSchema,  default: {} })
   address;
 }
 

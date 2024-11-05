@@ -4,13 +4,24 @@ import { AppService } from './app.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { ProductsModule } from './modules/products/products.module';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot(
-      'mongodb+srv://nikolaykumanov:2684357A.kolio@cluster0.j5a7u.mongodb.net/shop?retryWrites=true&w=majority&appName=Cluster0',
-    ),
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes ConfigModule available across the application without re-importing
+      envFilePath: '.env', // Path to the .env file
+    }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        uri: configService.get<string>('DATABASE_URL'),
+      }),
+    }),
     AuthModule,
+    SharedModule,
     ProductsModule,
   ],
   controllers: [],
