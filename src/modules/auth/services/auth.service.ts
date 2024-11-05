@@ -73,11 +73,38 @@ export class AuthUserService {
       const existingUser = await this._userModel.findOne({ email: userData.email });
       if (existingUser) {
         // check password here
-        return existingUser;
+        const passowrdMatch = await bcrypt.compare(userData.password, existingUser.password);
+        if (passowrdMatch) {
+          return existingUser;
+        }
       }
-      throw new Error('Wrong email or password!');
+      throw new BadRequestException('Wrong email or password!');
     } catch (error) {
-      console.log(error);
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async deleteUser(email: string): Promise<IUserInfo> {
+    try {
+      const existingUser = await this._userModel.findOne({ email });
+      if (existingUser) {
+        const deleted = await this._userModel.findByIdAndDelete(existingUser._id);
+        return deleted;
+      }
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.BAD_REQUEST,
+          error: error.message,
+        },
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 }
