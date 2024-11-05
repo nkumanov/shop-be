@@ -1,11 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { IsUserGuard } from './guards/isUser.guard';
-import { IsGuestGuard } from './guards/isGuest.guard';
-
+import * as dotenv from 'dotenv';
+dotenv.config();
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
- 
-  await app.listen(process.env.PORT ?? 3000);
+
+  await app.listen(process.env.PORT ?? (process.env.PORT || ''));
 }
 bootstrap();
