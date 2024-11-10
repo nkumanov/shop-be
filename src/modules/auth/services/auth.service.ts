@@ -1,46 +1,18 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User } from 'src/db/schemas/User.schema';
-import { IUserInfo } from '../dto/user';
 import * as bcrypt from 'bcrypt';
-import { JwtSvc } from '../../../shared/services/jwt.service';
-import { IUserCreateDto } from 'src/shared/interfaces/user.';
+import { Model } from 'mongoose';
+import { User, UserDocument } from 'src/db/schemas/User.schema';
+import { UserServiceDb } from 'src/db/services/user.service';
+import { IUserCreateDto } from 'src/shared/dto/user.dto.';
 @Injectable()
 export class AuthUserService {
   constructor(
     @InjectModel(User.name) private readonly _userModel: Model<User>,
-    private readonly jwtService: JwtSvc,
+    private readonly _userServiceDb: UserServiceDb,
   ) {}
 
-  async getUserById(userId: string): Promise<IUserInfo> {
-    try {
-      const user = this._userModel.findById(userId);
-      return user;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async getUserByUsername(username: string): Promise<IUserInfo> {
-    try {
-      const user = await this._userModel.findOne({ username });
-      return user;
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async createNewUser(userData: any): Promise<IUserInfo> {
-    try {
-      const newUser = new this._userModel(userData);
-      return await newUser.save();
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async signUp(userDataDto: IUserCreateDto): Promise<IUserInfo> {
+  async signUp(userDataDto: IUserCreateDto): Promise<UserDocument> {
     try {
       const checkIfExisting = await this._userModel.findOne({ email: userDataDto.email });
       if (checkIfExisting) {
@@ -56,7 +28,7 @@ export class AuthUserService {
       const passwordSalts = 10;
       const hashedPassword = await bcrypt.hash(userDataDto.password, passwordSalts);
       newUserToCreate.password = hashedPassword;
-      return this.createNewUser(newUserToCreate);
+      return this._userServiceDb.createNewUser(newUserToCreate);
     } catch (error) {
       throw new HttpException(
         {
@@ -68,7 +40,7 @@ export class AuthUserService {
     }
   }
 
-  async signIn(userData: { email: string; password: string }): Promise<IUserInfo> {
+  async signIn(userData: { email: string; password: string }): Promise<UserDocument> {
     try {
       const existingUser = await this._userModel.findOne({ email: userData.email });
       if (existingUser) {
@@ -90,7 +62,7 @@ export class AuthUserService {
     }
   }
 
-  async deleteUser(email: string): Promise<IUserInfo> {
+  async deleteUser(email: string): Promise<UserDocument> {
     try {
       const existingUser = await this._userModel.findOne({ email });
       if (existingUser) {

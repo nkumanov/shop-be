@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { HydratedDocument } from 'mongoose';
+import mongoose, { Document, HydratedDocument, Types } from 'mongoose';
+import { IProduct } from 'src/shared/models/products';
 
 const AddressSchema = new mongoose.Schema({
   city: String,
@@ -22,8 +23,12 @@ export class User {
   lastName: string;
   @Prop({ default: '' })
   phone: string;
-  @Prop({ type: AddressSchema,  default: {city: '', street: '', postalCode: ''} })
+  @Prop({ type: AddressSchema, default: { city: '', street: '', postalCode: '' } })
   address;
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Products' }], default: [] })
+  bookmarks: (IProduct | Types.ObjectId)[];
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Products' }], default: [] })
+  cart: Types.ObjectId[];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -2,10 +2,10 @@ import { Body, Controller, Delete, Get, Post, Req, Res, UseGuards } from '@nestj
 import { Request, Response } from 'express';
 import { IsGuestGuard } from 'src/guards/isGuest.guard';
 import { IsUserGuard } from 'src/guards/isUser.guard';
-import { AuthUserService } from './services/auth.service';
-import { IUserCreateDto, IUserSignInDto } from 'src/shared/interfaces/user.';
+import { IUserCreateDto, IUserSignInDto } from 'src/shared/dto/user.dto.';
+import { ICustomRequest } from 'src/shared/models/custom-header';
 import { JwtSvc } from 'src/shared/services/jwt.service';
-import { ICustomHeaders } from 'src/shared/interfaces/custom-header';
+import { AuthUserService } from './services/auth.service';
 
 @Controller('user/auth')
 export class AuthController {
@@ -25,6 +25,7 @@ export class AuthController {
         const token = await this._jwtService.createUserToken({
           email: existingUser.email,
           username: existingUser.username,
+          _id: existingUser._id.toString(),
         });
         response.send({
           data: {
@@ -46,6 +47,7 @@ export class AuthController {
         const token = await this._jwtService.createUserToken({
           email: registeredUser.email,
           username: registeredUser.username,
+          _id: registeredUser._id.toString(),
         });
         response.send({
           data: {
@@ -61,7 +63,7 @@ export class AuthController {
   }
   @Delete('/profile/delete')
   @UseGuards(IsUserGuard)
-  async deleteUserProfile(@Req() request: ICustomHeaders, @Res() response: Response): Promise<void> {
+  async deleteUserProfile(@Req() request: ICustomRequest, @Res() response: Response): Promise<void> {
     try {
       const deletedUser = await this._authUserService.deleteUser(request.user.email);
       if (deletedUser) {

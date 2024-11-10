@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
+import { DbModule } from 'src/db/db.module';
 import { RetrieveProductsController } from './retrieve-products/retrieve-products.controller';
-import { UserProductsController } from './user-products/user-products.controller';
 
 @Module({
-  imports: [],
-  controllers: [RetrieveProductsController, UserProductsController],
+  imports: [DbModule],
+  controllers: [RetrieveProductsController],
   providers: [],
 })
 export class ProductsModule {}
