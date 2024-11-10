@@ -1,14 +1,21 @@
-import { Controller, Delete, Get, Header, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { UserServiceDb } from 'src/db/services/user.service';
 import { IsUserGuard } from 'src/guards/isUser.guard';
+import { ICustomRequest } from 'src/shared/models/custom-header';
 
 @Controller('/user/products')
 export class UserProductsController {
+  constructor(private readonly _userService: UserServiceDb) {}
   @Get('/bookmarks')
   @UseGuards(IsUserGuard)
-  getUserBookmarks(@Req() req: Request, @Res() res: Response): void {
-    console.log('this route is used to retrieve all products that the user added to bookmarks');
-    res.send();
+  async getUserBookmarks(@Req() req: ICustomRequest, @Res() res: Response): Promise<void> {
+    try {
+      const bookmarks = await this._userService.getUserBookmarks(req.user._id);
+      res.send(bookmarks)
+    } catch (error) {
+      res.send(error);
+    }
   }
 
   @Post('/bookmarks/:productId')

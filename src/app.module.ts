@@ -6,12 +6,14 @@ import { ProductsModule } from './modules/products/products.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SharedModule } from './shared/shared.module';
+import { UserModule } from './modules/user/user.module';
+import { DbModule } from './db/db.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal: true, // Makes ConfigModule available across the application without re-importing
-      envFilePath: '.env', // Path to the .env file
+      isGlobal: true, 
+      envFilePath: '.env',
     }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -23,6 +25,8 @@ import { SharedModule } from './shared/shared.module';
     AuthModule,
     SharedModule,
     ProductsModule,
+    UserModule,
+    DbModule
   ],
   controllers: [],
   providers: [AppService],
