@@ -5,8 +5,9 @@ export enum EProductCategory {
 }
 
 export enum EProductSubCategory {
-  T_SHIRTS = 'T-SHIRTS',
-  HOODIES = 'HOODIES',
+  T_SHIRTS = 't-shirts',
+  HOODIES = 'hoodies',
+  SWIMWEAR = 'swimwear',
 }
 
 export interface IProduct {
@@ -17,5 +18,5 @@ export interface IProduct {
   price: string;
   description: string;
   sizes: { size: string; pieces: string }[];
-  images: { imageData: Buffer; imageType: string }[];
+  images: string[];
 }

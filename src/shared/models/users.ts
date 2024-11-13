@@ -5,3 +5,10 @@ export interface IUserData {
   username: string;
   _id: string;
 }
+
+export interface IAdminData {
+  email: string;
+  username: string;
+  admin: boolean;
+  _id: string;
+}

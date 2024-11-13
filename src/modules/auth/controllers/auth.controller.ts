@@ -5,7 +5,7 @@ import { IsUserGuard } from 'src/guards/isUser.guard';
 import { IUserCreateDto, IUserSignInDto } from 'src/shared/dto/user.dto.';
 import { ICustomRequest } from 'src/shared/models/custom-header';
 import { JwtSvc } from 'src/shared/services/jwt.service';
-import { AuthUserService } from './services/auth.service';
+import { AuthUserService } from '../services/auth.service';
 
 @Controller('user/auth')
 export class AuthController {

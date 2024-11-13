@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { IUserData } from '../models/users';
+import { IAdminData, IUserData } from '../models/users';
 
 @Injectable()
 export class JwtSvc {
@@ -10,10 +10,34 @@ export class JwtSvc {
     private readonly configService: ConfigService,
   ) {}
   async createUserToken(userData: IUserData): Promise<string> {
-    return await this._jwt.signAsync(userData, { secret: this.configService.get('JWT_SECRET') });
+    try {
+      return await this._jwt.signAsync(userData, { secret: this.configService.get('JWT_SECRET') });
+    } catch (error) {
+      return error;
+    }
   }
 
   async decodeUserToken(token: string): Promise<IUserData> {
-    return await this._jwt.verifyAsync(token, { secret: this.configService.get('JWT_SECRET') });
+    try {
+      return await this._jwt.verifyAsync(token, { secret: this.configService.get('JWT_SECRET') });
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async createAdminToken(userData: IAdminData): Promise<string> {
+    try {
+      return await this._jwt.signAsync(userData, { secret: this.configService.get('JWT_SECRET_ADMIN') });
+    } catch (error) {
+      return error;
+    }
+  }
+
+  async decodeAdminToken(token: string): Promise<IAdminData> {
+    try {
+      return await this._jwt.verifyAsync(token, { secret: this.configService.get('JWT_SECRET_ADMIN') });
+    } catch (error) {
+      return error;
+    }
   }
 }

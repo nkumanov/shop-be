@@ -5,9 +5,15 @@ export interface IUserCreateDto {
   confirmPassword: string;
 }
 
+export interface IAdminCreate extends IUserCreateDto {}
+
 export interface IUserSignInDto {
   email: string;
   password: string;
+}
+
+export interface IAdminLogin extends IUserSignInDto {
+  username: string;
 }
 
 export interface IUserInfoDto {
