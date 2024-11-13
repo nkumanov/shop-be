@@ -9,11 +9,21 @@ export class AuthMiddleware implements NestMiddleware {
   async use(req: ICustomRequest, res: Response, next: NextFunction) {
     if (req.headers['authorization']) {
       const decodedToken = await this._jwtSvc.decodeUserToken(req.headers['authorization']);
-      if (decodedToken) {
+      if (decodedToken.email) {
         req.user = {
           email: decodedToken.email,
           username: decodedToken.username,
-          _id: decodedToken._id
+          _id: decodedToken._id,
+        };
+      }
+    } else if (req.headers['admin-authorization']) {
+      const decodedToken = await this._jwtSvc.decodeAdminToken(req.headers['admin-authorization']);
+      if (decodedToken.email) {
+        req.admin = {
+          email: decodedToken.email,
+          username: decodedToken.username,
+          admin: true,
+          _id: decodedToken._id,
         };
       }
     }

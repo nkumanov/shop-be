@@ -1,20 +1,17 @@
 import { BadRequestException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
+
 import * as bcrypt from 'bcrypt';
-import { Model } from 'mongoose';
-import { User, UserDocument } from 'src/db/schemas/User.schema';
+
+import { UserDocument } from 'src/db/schemas/User.schema';
 import { UserServiceDb } from 'src/db/services/user.service';
 import { IUserCreateDto } from 'src/shared/dto/user.dto.';
 @Injectable()
 export class AuthUserService {
-  constructor(
-    @InjectModel(User.name) private readonly _userModel: Model<User>,
-    private readonly _userServiceDb: UserServiceDb,
-  ) {}
+  constructor(private readonly _userServiceDb: UserServiceDb) {}
 
   async signUp(userDataDto: IUserCreateDto): Promise<UserDocument> {
     try {
-      const checkIfExisting = await this._userModel.findOne({ email: userDataDto.email });
+      const checkIfExisting = await this._userServiceDb.getUserByEmail(userDataDto.email);
       if (checkIfExisting) {
         throw new BadRequestException('This email already exists!');
       }
@@ -42,7 +39,7 @@ export class AuthUserService {
 
   async signIn(userData: { email: string; password: string }): Promise<UserDocument> {
     try {
-      const existingUser = await this._userModel.findOne({ email: userData.email });
+      const existingUser = await this._userServiceDb.getUserByEmail(userData.email);
       if (existingUser) {
         // check password here
         const passowrdMatch = await bcrypt.compare(userData.password, existingUser.password);
@@ -64,9 +61,9 @@ export class AuthUserService {
 
   async deleteUser(email: string): Promise<UserDocument> {
     try {
-      const existingUser = await this._userModel.findOne({ email });
+      const existingUser = await this._userServiceDb.getUserByEmail(email);
       if (existingUser) {
-        const deleted = await this._userModel.findByIdAndDelete(existingUser._id);
+        const deleted = await this._userServiceDb.findUserByIdAndDelete(existingUser._id.toString());
         return deleted;
       }
     } catch (error) {
